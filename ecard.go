@@ -3,6 +3,7 @@ package ecard
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -87,4 +88,15 @@ func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roo
 	}
 	resp, _ := req.Post(e.URL+"/payFee/getBalance", data, header)
 	return gjson.GetBytes(resp.Bytes(), "feeDate.balance").String()
+}
+
+//IsCookieOverDue 判断cookie是否过期
+func (e *Ecard) IsCookieOverDue() bool {
+	resp, err := req.Get(e.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+	reg := regexp.MustCompile("<title>(.*)</title>")
+	ans := reg.FindSubmatch(resp.Bytes())
+	return string(ans[1]) == "智慧一卡通－登录"
 }
