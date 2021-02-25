@@ -20,6 +20,18 @@ type Ecard struct {
 	Password string
 }
 
+// Bill 账单
+// Time 交易时间
+// Content 交易内容
+// Money 交易金额
+// Balance 账户余额
+type Bill struct {
+	Time    string
+	Content string
+	Money   float64
+	Balance float64
+}
+
 // 获取rsa的公钥
 func (e *Ecard) getKeyMap() (exponent string, modulus string) {
 	resp, err := req.Post(e.URL + "/publiccombo/keyPair")
@@ -76,18 +88,6 @@ OUT:
 	if state == 3 {
 		fmt.Println("登陆成功:" + e.Username)
 	}
-}
-
-// ObtainDormitoryElectricity 获取寝室电费余额
-func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roomNo string) string {
-	data := req.Param{
-		"data": `{"itemNum":"1","areano":"` + areaNo + `","buildingno":"` + buildingNo + `","roomno":"` + roomNo + `"}`,
-	}
-	header := req.Header{
-		"X-Requested-With": "XMLHttpRequest",
-	}
-	resp, _ := req.Post(e.URL+"/payFee/getBalance", data, header)
-	return gjson.GetBytes(resp.Bytes(), "feeDate.balance").String()
 }
 
 //IsCookieOverDue 判断cookie是否过期
