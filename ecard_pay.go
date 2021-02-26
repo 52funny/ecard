@@ -1,19 +1,18 @@
 package ecard
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/imroc/req"
 )
 
 // PayElectricity 支付电费
-func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, payMoney string) string {
+func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, payMoney string) (string, error) {
 	resp, err := req.Post(e.URL+"/payFee/showItemListPayPage", req.Param{
 		"itemNum": "1",
 	})
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
 	// fmt.Println(resp.String())
 	reg := regexp.MustCompile("<input type=\"hidden\" id=\"itemNum\" value=\"(.*)\">")
@@ -54,5 +53,5 @@ func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, 
 	reg = regexp.MustCompile("<p.*><strong>(.*)</strong></p.*>")
 	result := string(reg.FindSubmatch(resp.Bytes())[1])
 
-	return result
+	return result, nil
 }

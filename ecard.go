@@ -2,7 +2,6 @@ package ecard
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"time"
@@ -33,10 +32,10 @@ type Bill struct {
 }
 
 // 获取rsa的公钥
-func (e *Ecard) getKeyMap() (exponent string, modulus string) {
+func (e *Ecard) getKeyMap() (exponent string, modulus string, err error) {
 	resp, err := req.Post(e.URL + "/publiccombo/keyPair")
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	keyMap := gjson.GetBytes(resp.Bytes(), "publicKeyMap")
 	exponent = keyMap.Get("exponent").String()
@@ -45,10 +44,10 @@ func (e *Ecard) getKeyMap() (exponent string, modulus string) {
 }
 
 // 获取验证码
-func (e *Ecard) getCodeImg() (code string) {
+func (e *Ecard) getCodeImg() (code string, err error) {
 	resp, err := req.Get(e.URL + "/jcaptcha.jpg?" + strconv.FormatInt(time.Now().Unix(), 10))
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	client := gosseract.NewClient()
 	defer client.Close()
@@ -58,15 +57,21 @@ func (e *Ecard) getCodeImg() (code string) {
 }
 
 // Login 登陆系统
-func (e *Ecard) Login() {
-	exponent, modulus := e.getKeyMap()
+func (e *Ecard) Login() (err error) {
+	exponent, modulus, err := e.getKeyMap()
+	if err != nil {
+		return
+	}
 	header := req.Header{
 		"X-Requested-With": "XMLHttpRequest",
 	}
 	var state int64
 OUT:
 	for state != 3 {
-		code := e.getCodeImg()
+		code, err := e.getCodeImg()
+		if err != nil {
+			return err
+		}
 		data := req.Param{
 			"username":     utils.RsaEncrypt(exponent, modulus, e.Username),
 			"password":     utils.RsaEncrypt(exponent, modulus, e.Password),
@@ -88,15 +93,24 @@ OUT:
 	if state == 3 {
 		fmt.Println("登陆成功:" + e.Username)
 	}
+	return
+}
+
+// MustLogin 会panic error
+func (e *Ecard) MustLogin() {
+	err := e.Login()
+	if err != nil {
+		panic(err)
+	}
 }
 
 //IsCookieOverDue 判断cookie是否过期
-func (e *Ecard) IsCookieOverDue() bool {
+func (e *Ecard) IsCookieOverDue() (b bool, err error) {
 	resp, err := req.Get(e.URL)
 	if err != nil {
-		fmt.Println(err)
+		return true, err
 	}
 	reg := regexp.MustCompile("<title>(.*)</title>")
 	ans := reg.FindSubmatch(resp.Bytes())
-	return string(ans[1]) == "智慧一卡通－登录"
+	return string(ans[1]) == "智慧一卡通－登录", nil
 }

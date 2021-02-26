@@ -1,7 +1,6 @@
 package ecard
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"time"
@@ -12,30 +11,33 @@ import (
 )
 
 // ObtainBalance 获取饭卡余额
-func (e *Ecard) ObtainBalance() string {
+func (e *Ecard) ObtainBalance() (string, error) {
 	resp, err := req.Get(e.URL + "/balance")
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
 	reg := regexp.MustCompile("<p class=\"money\">(.*) <span>")
 	money := reg.FindSubmatch(resp.Bytes())[1]
-	return string(money)
+	return string(money), nil
 }
 
 // ObtainDormitoryElectricity 获取寝室电费余额
-func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roomNo string) string {
+func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roomNo string) (string, error) {
 	data := req.Param{
 		"data": `{"itemNum":"1","areano":"` + areaNo + `","buildingno":"` + buildingNo + `","roomno":"` + roomNo + `"}`,
 	}
 	header := req.Header{
 		"X-Requested-With": "XMLHttpRequest",
 	}
-	resp, _ := req.Post(e.URL+"/payFee/getBalance", data, header)
-	return gjson.GetBytes(resp.Bytes(), "feeDate.balance").String()
+	resp, err := req.Post(e.URL+"/payFee/getBalance", data, header)
+	if err != nil {
+		return "", err
+	}
+	return gjson.GetBytes(resp.Bytes(), "feeDate.balance").String(), err
 }
 
 // ObtainTodayBill 获取今天的消费记录
-func (e *Ecard) ObtainTodayBill(size string) []Bill {
+func (e *Ecard) ObtainTodayBill(size string) ([]Bill, error) {
 	param := req.Param{
 		"startdealTime": time.Now().Format("2006-01-02"),
 		"enddealTime":   time.Now().Format("2006-01-02"),
@@ -45,7 +47,7 @@ func (e *Ecard) ObtainTodayBill(size string) []Bill {
 	}
 	reader, err := req.Post(e.URL+"/bill", param)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	billS := make([]Bill, 0)
 	dom, err := goquery.NewDocumentFromReader(reader.Response().Body)
@@ -62,5 +64,5 @@ func (e *Ecard) ObtainTodayBill(size string) []Bill {
 		}
 		billS = append(billS, bill)
 	})
-	return billS
+	return billS, nil
 }
