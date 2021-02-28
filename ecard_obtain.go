@@ -36,11 +36,17 @@ func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roo
 	return gjson.GetBytes(resp.Bytes(), "feeDate.balance").String(), err
 }
 
-// ObtainTodayBill 获取今天的消费记录
-func (e *Ecard) ObtainTodayBill(size string) ([]Bill, error) {
+// ObtainIntervalBill 获取时间区间的账单信息
+// typeFlag 1 消费 2 充值 3 补助 4 互转
+// size 页面大小
+// startTime 开始时间
+// endTime 结束时间
+// 时间格式应为 2006-01-02类型
+func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([]Bill, error) {
 	param := req.Param{
-		"startdealTime": time.Now().Format("2006-01-02"),
-		"enddealTime":   time.Now().Format("2006-01-02"),
+		"typeFlag":      typeFlag,
+		"startdealTime": startTime,
+		"enddealTime":   endTime,
 		"start":         "1",
 		"end":           size,
 		"size":          size,
@@ -65,4 +71,11 @@ func (e *Ecard) ObtainTodayBill(size string) ([]Bill, error) {
 		billS = append(billS, bill)
 	})
 	return billS, nil
+
+}
+
+// ObtainTodayBill 获取今天的消费记录
+// typeFlag 1 消费 2 充值 3 补助 4 互转
+func (e *Ecard) ObtainTodayBill(typeFlag string, size string) ([]Bill, error) {
+	return e.ObtainIntervalBill(typeFlag, size, time.Now().Format("2006-01-02"), time.Now().Format("2006-01-02"))
 }
