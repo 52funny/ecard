@@ -1,6 +1,7 @@
 package ecard
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -112,5 +113,5 @@ func (e *Ecard) IsCookieOverDue() (b bool, err error) {
 	}
 	reg := regexp.MustCompile("<title>(.*)</title>")
 	ans := reg.FindSubmatch(resp.Bytes())
-	return string(ans[1]) == "智慧一卡通－登录", nil
+	return bytes.Compare(ans[1], []byte("智慧一卡通－登录")) == 0, nil
 }
