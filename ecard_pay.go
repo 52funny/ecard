@@ -50,6 +50,9 @@ func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, 
 		"token":      token,
 	}
 	resp, err = req.Post(e.URL+"/payFee/payItemlist", param)
+	if err != nil {
+		return "", nil
+	}
 	reg = regexp.MustCompile("<p.*><strong>(.*)</strong></p.*>")
 	result := string(reg.FindSubmatch(resp.Bytes())[1])
 

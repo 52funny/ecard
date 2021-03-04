@@ -57,6 +57,9 @@ func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([
 	}
 	billS := make([]Bill, 0)
 	dom, err := goquery.NewDocumentFromReader(reader.Response().Body)
+	if err != nil {
+		return nil, err
+	}
 	dom.Find(".row tbody > tr").Each(func(i int, s *goquery.Selection) {
 		time := s.Find(".text-muted").Text()
 		content := s.Find(".time + td").Text()
