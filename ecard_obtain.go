@@ -63,13 +63,22 @@ func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([
 	dom.Find(".row tbody > tr").Each(func(i int, s *goquery.Selection) {
 		time := s.Find(".text-muted").Text()
 		content := s.Find(".time + td").Text()
-		money, _ := strconv.ParseFloat(s.Find(".price").Text(), 10)
-		balance, _ := strconv.ParseFloat(s.Find("td:last-child").Text(), 10)
+		merchant := s.Find("td:nth-child(4)").Text()
+		location := s.Find("td:nth-child(5)").Text()
+		money, _ := strconv.ParseFloat(s.Find("td:nth-child(6)").Text(), 10)
+		var balance float64
+		if typeFlag == "0" {
+			balance, _ = strconv.ParseFloat(s.Find("td:last-child").Text(), 10)
+		} else if typeFlag == "1" || typeFlag == "2" {
+			balance, _ = strconv.ParseFloat(s.Find("td:nth-last-child(2)").Text(), 10)
+		}
 		bill := Bill{
-			Time:    time,
-			Content: content,
-			Money:   money,
-			Balance: balance,
+			Time:     time,
+			Content:  content,
+			Merchant: merchant,
+			Location: location,
+			Money:    money,
+			Balance:  balance,
 		}
 		billS = append(billS, bill)
 	})

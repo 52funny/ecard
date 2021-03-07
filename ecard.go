@@ -26,10 +26,12 @@ type Ecard struct {
 // Money 交易金额
 // Balance 账户余额
 type Bill struct {
-	Time    string
-	Content string
-	Money   float64
-	Balance float64
+	Time     string
+	Content  string
+	Merchant string
+	Location string
+	Money    float64
+	Balance  float64
 }
 
 // 获取rsa的公钥
