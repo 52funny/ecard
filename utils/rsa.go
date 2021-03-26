@@ -27,8 +27,8 @@ var instance *goja.Runtime
 var once sync.Once
 
 func getRuntime() *goja.Runtime {
-	r := goja.New()
 	once.Do(func() {
+		r := goja.New()
 		// f, err := os.Open("./utils/security.js")
 		// if err != nil {
 		// 	panic(err)
