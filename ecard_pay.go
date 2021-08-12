@@ -8,9 +8,13 @@ import (
 
 // PayElectricity 支付电费
 func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, payMoney string) (string, error) {
-	resp, err := req.Post(e.URL+"/payFee/showItemListPayPage", req.Param{
+	_, err := e.req.Get(e.URL+"/payFee", e.Cookie)
+	if err != nil {
+		return "", err
+	}
+	resp, err := e.req.Post(e.URL+"/payFee/showItemListPayPage", req.Param{
 		"itemNum": "1",
-	})
+	}, e.Cookie)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +53,7 @@ func (e *Ecard) PayElectricity(areaNo string, buildingNo string, roomNo string, 
 		"cardaccNum": cardAccNum,
 		"token":      token,
 	}
-	resp, err = req.Post(e.URL+"/payFee/payItemlist", param)
+	resp, err = e.req.Post(e.URL+"/payFee/payItemlist", param, e.Cookie)
 	if err != nil {
 		return "", nil
 	}

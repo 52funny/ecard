@@ -180,7 +180,7 @@ func TestPool(t *testing.T) {
 	defer ants.Release()
 	var wait sync.WaitGroup
 	p, err := ants.NewPoolWithFunc(50, func(item interface{}) {
-		ans, _ := e.ObtainDormitoryElectricity("0", "5", item.(string))
+		ans, _ := e.ObtainDormitoryElectricity("1", "5", item.(string))
 		fmt.Println(item, ans)
 		wait.Done()
 	})

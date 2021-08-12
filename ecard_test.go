@@ -25,11 +25,8 @@ func getEcard() *Ecard {
 	u := new(User)
 	json.Unmarshal(dataBytes, u)
 
-	e := &Ecard{
-		URL:      "http://60.171.203.79:8090/easytong_portal",
-		Username: u.Username,
-		Password: u.Password,
-	}
+	e := New(u.Username, u.Password, "http://60.171.203.79:8090/easytong_portal")
+	fmt.Println(e)
 	return e
 }
 func TestLogin(t *testing.T) {
@@ -40,8 +37,8 @@ func TestLogin(t *testing.T) {
 func TestDormitoryElectricity(t *testing.T) {
 	e := getEcard()
 	e.Login()
-	fmt.Println(e.ObtainDormitoryElectricity("0", "5", "237"))
-	fmt.Println(e.ObtainDormitoryElectricity("0", "5", "k237"))
+	fmt.Println(e.ObtainDormitoryElectricity("1", "5", "237"))
+	fmt.Println(e.ObtainDormitoryElectricity("1", "5", "k237"))
 }
 
 func TestCookie(t *testing.T) {
@@ -59,7 +56,7 @@ func TestPay(t *testing.T) {
 	e := getEcard()
 	e.Login()
 	for i := 0; i < 5; i++ {
-		result, err := e.PayElectricity("0", "5", "k237", "0.01")
+		result, err := e.PayElectricity("1", "5", "237", "0.01")
 		if err != nil {
 			panic(err)
 		}

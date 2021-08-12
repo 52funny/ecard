@@ -3,6 +3,7 @@ package ecard
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -12,7 +13,7 @@ import (
 
 // ObtainBalance 获取饭卡余额
 func (e *Ecard) ObtainBalance() (string, error) {
-	resp, err := req.Get(e.URL + "/balance")
+	resp, err := e.req.Get(e.URL+"/balance", e.Cookie)
 	if err != nil {
 		return "", err
 	}
@@ -29,7 +30,7 @@ func (e *Ecard) ObtainDormitoryElectricity(areaNo string, buildingNo string, roo
 	header := req.Header{
 		"X-Requested-With": "XMLHttpRequest",
 	}
-	resp, err := req.Post(e.URL+"/payFee/getBalance", data, header)
+	resp, err := e.req.Post(e.URL+"/payFee/getBalance", data, header, e.Cookie)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +52,7 @@ func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([
 		"end":           size,
 		"size":          size,
 	}
-	reader, err := req.Post(e.URL+"/bill", param)
+	reader, err := e.req.Post(e.URL+"/bill", param, e.Cookie)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +66,12 @@ func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([
 		content := s.Find(".time + td").Text()
 		merchant := s.Find("td:nth-child(4)").Text()
 		location := s.Find("td:nth-child(5)").Text()
-		money, _ := strconv.ParseFloat(s.Find("td:nth-child(6)").Text(), 10)
+		money, _ := strconv.ParseFloat(s.Find("td:nth-child(6)").Text(), 64)
 		var balance float64
-		if typeFlag == "0" {
-			balance, _ = strconv.ParseFloat(s.Find("td:last-child").Text(), 10)
+		if strings.Compare(typeFlag, "0") == 0 {
+			balance, _ = strconv.ParseFloat(s.Find("td:last-child").Text(), 64)
 		} else if typeFlag == "1" || typeFlag == "2" {
-			balance, _ = strconv.ParseFloat(s.Find("td:nth-last-child(2)").Text(), 10)
+			balance, _ = strconv.ParseFloat(s.Find("td:nth-last-child(2)").Text(), 64)
 		}
 		bill := Bill{
 			Time:     time,
