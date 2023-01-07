@@ -9,7 +9,7 @@ import (
 
 	"github.com/52funny/ecard/utils"
 	"github.com/imroc/req"
-	"github.com/otiai10/gosseract"
+	"github.com/otiai10/gosseract/v2"
 	"github.com/tidwall/gjson"
 )
 
@@ -55,7 +55,10 @@ func (e *Ecard) getCodeImg() (code string, err error) {
 	client := gosseract.NewClient()
 	defer client.Close()
 	client.SetImageFromBytes(resp.Bytes())
-	code, _ = client.Text()
+	code, err = client.Text()
+	if err != nil {
+		panic(err)
+	}
 	return
 }
 
@@ -75,9 +78,10 @@ OUT:
 		if err != nil {
 			return err
 		}
+
 		data := req.Param{
-			"username":     utils.RsaEncrypt(exponent, modulus, e.Username),
-			"password":     utils.RsaEncrypt(exponent, modulus, e.Password),
+			"username":     utils.RsaEncrypt2(exponent, modulus, e.Username),
+			"password":     utils.RsaEncrypt2(exponent, modulus, e.Password),
 			"jcaptchacode": code,
 		}
 		resp, _ := req.Post(e.URL+"/login", data, header)
@@ -107,7 +111,7 @@ func (e *Ecard) MustLogin() {
 	}
 }
 
-//IsCookieOverDue 判断cookie是否过期
+// IsCookieOverDue 判断cookie是否过期
 func (e *Ecard) IsCookieOverDue() (b bool, err error) {
 	resp, err := req.Get(e.URL)
 	if err != nil {

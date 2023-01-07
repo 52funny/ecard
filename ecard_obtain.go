@@ -65,12 +65,12 @@ func (e *Ecard) ObtainIntervalBill(typeFlag, size, startTime, endTime string) ([
 		content := s.Find(".time + td").Text()
 		merchant := s.Find("td:nth-child(4)").Text()
 		location := s.Find("td:nth-child(5)").Text()
-		money, _ := strconv.ParseFloat(s.Find("td:nth-child(6)").Text(), 10)
+		money, _ := strconv.ParseFloat(s.Find("td:nth-child(6)").Text(), 64)
 		var balance float64
 		if typeFlag == "0" {
-			balance, _ = strconv.ParseFloat(s.Find("td:last-child").Text(), 10)
+			balance, _ = strconv.ParseFloat(s.Find("td:last-child").Text(), 64)
 		} else if typeFlag == "1" || typeFlag == "2" {
-			balance, _ = strconv.ParseFloat(s.Find("td:nth-last-child(2)").Text(), 10)
+			balance, _ = strconv.ParseFloat(s.Find("td:nth-last-child(2)").Text(), 64)
 		}
 		bill := Bill{
 			Time:     time,
